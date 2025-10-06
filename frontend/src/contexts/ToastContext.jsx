@@ -18,11 +18,6 @@ export const ToastProvider = ({ children }) => {
     const newToast = { id, title, message, variant, show: true };
 
     setToasts((prev) => [...prev, newToast]);
-
-    // Remove o toast após 3 segundos
-    setTimeout(() => {
-      removeToast(id);
-    }, 3000);
   };
 
   const removeToast = (id) => {

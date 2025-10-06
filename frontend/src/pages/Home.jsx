@@ -2,8 +2,11 @@ import React from "react";
 import { Container, Button, Row, Col } from "react-bootstrap";
 
 import AppNavbar from "../components/layout/AppNavbar";
+import { useToast } from "../contexts/ToastContext";
 
 function Home() {
+  const { addToast } = useToast();
+
   return (
     <div className="min-vh-100">
       <AppNavbar />
@@ -32,6 +35,13 @@ function Home() {
                   variant="success"
                   size="lg"
                   className="rounded-pill px-4 py-3 fw-semibold shadow"
+                  onClick={() => {
+                    addToast(
+                      "Informação",
+                      "Funcionalidade em desenvolvimento",
+                      "warning"
+                    );
+                  }}
                 >
                   Criar turma
                 </Button>

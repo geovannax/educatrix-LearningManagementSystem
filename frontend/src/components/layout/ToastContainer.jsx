@@ -19,7 +19,7 @@ function ToastContainer() {
           key={toast.id}
           show={toast.show}
           onClose={() => removeToast(toast.id)}
-          delay={3000}
+          delay={5000}
           autohide
         >
           <Toast.Header
@@ -28,7 +28,7 @@ function ToastContainer() {
           >
             <strong className="me-auto">{toast.title}</strong>
           </Toast.Header>
-          <Toast.Body>{toast.message}</Toast.Body>
+          <Toast.Body className="bg-gray-light">{toast.message}</Toast.Body>
         </Toast>
       ))}
     </BootstrapToastContainer>

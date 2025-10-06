@@ -2,10 +2,12 @@ import React from "react";
 import { Navbar, Nav, Container, Button, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../contexts/ToastContext";
 
 function AppNavbar() {
   const { isAuthenticated, isTeacher, logout } = useAuth();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   // Função para extrair primeiro e último nome
   const getDisplayName = () => {
@@ -23,6 +25,10 @@ function AppNavbar() {
     }
 
     return fullName;
+  };
+
+  const inDevelopment = () => {
+    addToast("Informação", "Funcionalidade em desenvolvimento", "warning");
   };
 
   return (
@@ -56,11 +62,17 @@ function AppNavbar() {
               Home
             </Nav.Link>
 
-            <Nav.Link href="#professores" className="text-dark me-4">
+            <Nav.Link
+              onClick={() => inDevelopment()}
+              className="text-dark me-4"
+            >
               Professores
             </Nav.Link>
 
-            <Nav.Link href="#alunos" className="text-dark me-4">
+            <Nav.Link
+              onClick={() => inDevelopment()}
+              className="text-dark me-4"
+            >
               Alunos
             </Nav.Link>
 
@@ -69,10 +81,14 @@ function AppNavbar() {
               <Dropdown as={Nav.Item} className="text-dark me-4">
                 <Dropdown.Toggle as={Nav.Link}>Turmas</Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item href="#turma-a">Turma A</Dropdown.Item>
-                  <Dropdown.Item href="#turma-b">Turma B</Dropdown.Item>
+                  <Dropdown.Item onClick={() => inDevelopment()}>
+                    Turma A
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => inDevelopment()}>
+                    Turma B
+                  </Dropdown.Item>
                   <Dropdown.Item divider />
-                  <Dropdown.Item onClick={() => navigate("/cadastro-turmas")}>
+                  <Dropdown.Item onClick={() => inDevelopment()}>
                     <i className="bi bi-plus-circle me-2"></i>
                     Nova Turma
                   </Dropdown.Item>
@@ -115,7 +131,7 @@ function AppNavbar() {
                 style={{ minWidth: "200px" }}
               >
                 <Dropdown.Item
-                  href="#perfil"
+                  onClick={() => inDevelopment()}
                   className="d-flex align-items-center py-2"
                 >
                   <i className="bi bi-person me-3"></i>
@@ -124,7 +140,7 @@ function AppNavbar() {
 
                 {isTeacher() && (
                   <Dropdown.Item
-                    href="#minhas-turmas"
+                    onClick={() => inDevelopment()}
                     className="d-flex align-items-center py-2"
                   >
                     <i className="bi bi-people me-3"></i>
