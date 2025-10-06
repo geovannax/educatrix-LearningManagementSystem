@@ -8,13 +8,20 @@ class AuthService {
    * @returns {Promise<Object>} Resultado da autenticação
    */
   async authenticate(email, password) {
-    const user = User.findByEmail(email);
-
-    if (!user || user.password !== password) {
-      return false;
+    // Validar entrada básica email e password.
+    if (!email || !password) {
+      return { status: 400, message: "Email e password são obrigatórios" };
     }
 
-    return user;
+    const user = User.findByEmail(email);
+    if (!user || user.password !== password) {
+      return { status: 401, message: "Credenciais inválidas" };
+    }
+
+    // Gerar token no  service
+    const token = this.generateMockToken(user);
+
+    return { ...user, token };
   }
 
   /**

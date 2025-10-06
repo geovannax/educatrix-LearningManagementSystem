@@ -42,6 +42,9 @@ const router = Router();
  *                     role:
  *                       type: string
  *                       example: "professor"
+ *                     name:
+ *                       type: string
+ *                       example: "Professor Educatrix"
  *                     token:
  *                       type: string
  *                       example: "fake-token-professor-1"

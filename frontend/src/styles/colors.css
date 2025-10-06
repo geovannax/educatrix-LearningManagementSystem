@@ -1,0 +1,64 @@
+/* Cores identificadas no projeto Educatrix */
+
+:root {
+  /* Cores principais do brand */
+  --educatrix-green: #059669;
+  --educatrix-blue: #4f46e5;
+
+  /* Cores básicas */
+  --primary-black: #000000;
+  --primary-white: #ffffff;
+
+  /* Tons de cinza */
+  --gray: #f5f5f5;
+  --gray-light: #f8fafc;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+
+  /* Cores de estado */
+  --success: #059669;
+  --danger: #dc3545;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+}
+
+/* Classes de background */
+.bg-educatrix-green {
+  background-color: var(--educatrix-green);
+}
+.bg-educatrix-blue {
+  background-color: var(--educatrix-blue);
+}
+.bg-gray-light {
+  background-color: var(--gray-light);
+}
+.bg-info {
+  background-color: var(--info);
+}
+
+/* Classes de texto */
+.text-educatrix-green {
+  color: var(--educatrix-green);
+}
+.text-educatrix-blue {
+  color: var(--educatrix-blue);
+}
+.text-dark-custom {
+  color: var(--text-dark);
+}
+.text-muted-custom {
+  color: var(--text-muted);
+}
+
+/* Botões customizados */
+.btn-educatrix-green {
+  background-color: var(--educatrix-green);
+  border-color: var(--educatrix-green);
+  color: white;
+}
+
+.btn-educatrix-blue {
+  background-color: var(--educatrix-blue);
+  border-color: var(--educatrix-blue);
+  color: white;
+}

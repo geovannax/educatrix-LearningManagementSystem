@@ -45,9 +45,6 @@ app.use("/health", healthRouter);
 app.use("/api/v1/activities", activityRouter);
 app.use("/api/v1/auth", authRouter);
 
-// --- Servir o frontend estático (pasta frontend/)
-app.use("/", express.static(path.resolve(__dirname, "../../frontend")));
-
 // --- Subir servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

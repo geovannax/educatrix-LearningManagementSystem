@@ -1,3 +1,4 @@
+import e from "cors";
 import ActivityService from "../services/ActivityService.js";
 import BaseController from "./BaseController.js";
 
