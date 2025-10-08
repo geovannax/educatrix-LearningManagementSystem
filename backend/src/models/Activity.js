@@ -6,9 +6,7 @@
 class Activity {
   constructor(activityData) {
     this.id = activityData.id;
-    this.title = activityData.title;
-    this.type = activityData.type;
-    this.description = activityData.description;
+    Object.assign(this, activityData);
     this.createdAt = new Date().toISOString();
     this.updatedAt = new Date().toISOString();
   }
@@ -16,6 +14,8 @@ class Activity {
   // Validações
   async validateActivityInput() {
     const errors = [];
+
+    await this.requiredFields(this);
 
     if (!this.title || this.title.trim().length < 3) {
       errors.push("Título deve ter pelo menos 3 caracteres");
@@ -30,6 +30,27 @@ class Activity {
     }
 
     return errors;
+  }
+
+  async requiredFields(activityData) {
+    // Verificar se activityData contém todas as chaves necessárias
+    const requiredKeys = ["title", "description", "type"];
+    const providedKeys = Object.keys(activityData);
+    const hasAllRequiredKeys = requiredKeys.every((key) =>
+      providedKeys.includes(key)
+    );
+
+    if (!hasAllRequiredKeys) {
+      const missingKeys = requiredKeys.filter(
+        (key) => !providedKeys.includes(key)
+      );
+      const error = new Error("Dados de entrada inválidos");
+      error.details = `É necessário fornecer todas as chaves obrigatórias. Chaves ausentes: ${missingKeys.join(
+        ", "
+      )}`;
+      error.code = 400;
+      throw error;
+    }
   }
 
   // Serialização para JSON

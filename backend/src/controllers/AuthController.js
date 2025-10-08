@@ -6,27 +6,29 @@ const authService = AuthService;
 class AuthController {
   static async authenticate(req, res) {
     try {
-      // Validar entrada básica email e password.
-      // quando tiver o frontend, fazer validação mais robusta lá
+      // Obter email e password do corpo da requisição
       const { email, password } = req.body || {};
 
-      if (!email || !password) {
-        return BaseController.send400(res, "Email e password são obrigatórios");
-      }
-
-      // Service retorna user ou false
+      // Service retorna o usuário ou erros
       const user = await authService.authenticate(email, password);
 
-      if (!user) {
-        return BaseController.send401(res, "Credenciais inválidas");
+      if (user.status === 400) {
+        return BaseController.send400(res, user.message);
+      } else if (user.status === 401) {
+        return BaseController.send401(res, user.message);
       }
 
-      // Gerar token no  service
-      const token = authService.generateMockToken(user);
+      // Cookie HttpOnly - JavaScript NÃO pode acessar
+      res.cookie("authToken", user.token, {
+        httpOnly: true,
+        secure: true, // Apenas HTTPS
+        sameSite: "strict", // Proteção CSRF
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      });
 
       return BaseController.send200(
         res,
-        { role: user.role, token: token },
+        { role: user.role, name: user.name, token: user.token },
         "Login bem-sucedido"
       );
     } catch (error) {

@@ -20,7 +20,7 @@ class User {
         email: "prof@educatrix.dev",
         password: "123456", // Em produção: bcrypt.hashSync("123456", 10)
         role: "professor",
-        name: "Professor Educatrix",
+        name: "Professor do Educatrix",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
