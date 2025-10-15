@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" //  Em produção usar env("DATABASE_URL")
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique // Ex: "aluno", "professor", "admin"
+  users User[]         // Relação com usuários
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  activities Activity[]
+
+  // Relação com o papel (Role)
+  role      Role     @relation(fields: [roleId], references: [id])
+  roleId    Int
+}
+
+model Activity {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relação com o tipo de atividade (ActivityType)
+  typeId      Int
+  type        ActivityType @relation(fields: [typeId], references: [id])
+
+  // Relação com o professor (User)
+  professorId Int
+  professor   User     @relation(fields: [professorId], references: [id])
+}
+
+
+model ActivityType {
+  id    Int    @id @default(autoincrement())
+  type  String @unique // Ex: "codigo", "discursiva", "objetiva"
+  activities Activity[]         // Relação com atividades
+}

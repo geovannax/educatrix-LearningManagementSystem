@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Container,
   Row,
@@ -10,27 +9,14 @@ import {
   Form,
   Button,
   Table,
-  Alert,
 } from "react-bootstrap";
 import AppNavbar from "../components/layout/AppNavbar";
 import { useActivities } from "../hooks/useActivities";
 import { useToast } from "../contexts/ToastContext";
-
-const activitySchema = z.object({
-  activityTitle: z.string().min(3, "Nome da atividade é obrigatório"),
-  activityType: z
-    .string()
-    .refine((value) => ["codigo", "discursiva", "objetiva"].includes(value), {
-      message: "Selecione um tipo de atividade válido",
-    }),
-  activityDescription: z
-    .string()
-    .min(
-      10,
-      "Descrição da atividade é obrigatória e deve ter ao menos 10 caracteres"
-    ),
-  habilitarChatInterativo: z.boolean(),
-});
+import {
+  ACTIVITY_TYPES,
+  activitySchema,
+} from "@educatrix/shared/schemas/activitySchema.js";
 
 function Activity() {
   // Estado para controlar qual view mostrar
@@ -57,21 +43,9 @@ function Activity() {
     setValue,
   } = useForm({
     resolver: zodResolver(activitySchema),
-    defaultValues: {
-      nomeDaAtividade: "",
-      descricaoDaAtividade: "",
-      habilitarChatInterativo: false,
-    },
   });
 
-  const onSubmit = async (data) => {
-    // Cria instância da nova atividade
-    const activityData = {
-      title: data.activityTitle,
-      type: data.activityType,
-      description: data.activityDescription,
-    };
-
+  const onSubmit = async (activityData) => {
     let result;
 
     if (editingActivity) {
@@ -101,9 +75,9 @@ function Activity() {
 
     if (activity) {
       // Preencher o formulário com os dados da atividade
-      setValue("activityTitle", activity.title);
-      setValue("activityType", activity.type);
-      setValue("activityDescription", activity.description);
+      setValue("title", activity.title);
+      setValue("type", activity.type);
+      setValue("description", activity.description);
       // Mudar o estado para edição
       setEditingActivity(activity);
       // Mudar para a aba de cadastro
@@ -111,13 +85,6 @@ function Activity() {
     } else {
       addToast("Erro", "Atividade não encontrada!", "danger");
     }
-  };
-
-  // Função para cancelar a edição
-  const cancelUpdate = () => {
-    setEditingActivity(null);
-    reset();
-    setActiveTab("lista");
   };
 
   const onDelete = async (id) => {
@@ -129,12 +96,28 @@ function Activity() {
     }
   };
 
+  // Função para cancelar a edição
+  const cancelUpdate = () => {
+    setEditingActivity(null);
+    reset();
+    setActiveTab("lista");
+  };
+
+  // Exibir toast de erro apenas quando errorActivity mudar
+  useEffect(() => {
+    if (errorActivity) {
+      addToast("Erro", errorActivity, "danger");
+      clearError();
+    }
+  }, [errorActivity, addToast, clearError]);
+
   return (
     <div className="min-vh-100 bg-gray-light">
       <AppNavbar />
 
       <Container className="py-5">
         <Row className="justify-content-center">
+          {" "}
           <Col xs={12} lg={activeTab === "lista" ? 10 : 8}>
             {activeTab === "lista" ? (
               <Card className="shadow-sm border-0">
@@ -239,27 +222,6 @@ function Activity() {
                     </h2>
                   </div>
 
-                  {errorActivity && (
-                    <Alert
-                      variant="danger"
-                      className="text-center"
-                      dismissible
-                      onClose={clearError}
-                    >
-                      {typeof errorActivity === "string" ? (
-                        errorActivity
-                      ) : Array.isArray(errorActivity) ? (
-                        <ul className="mb-0 text-start">
-                          {errorActivity.map((error, index) => (
-                            <li key={index}>{error}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        "Erro desconhecido"
-                      )}
-                    </Alert>
-                  )}
-
                   <Form onSubmit={handleSubmit(onSubmit)}>
                     <Form.Group className="mb-4">
                       <Form.Label className="fw-semibold">
@@ -268,12 +230,12 @@ function Activity() {
                       <Form.Control
                         type="text"
                         placeholder="Exemplo de preenchido"
-                        {...register("activityTitle")}
-                        isInvalid={!!errors.activityTitle}
+                        {...register("title")}
+                        isInvalid={!!errors.title}
                         className="py-3"
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.activityTitle?.message}
+                        {errors.title?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
 
@@ -282,20 +244,22 @@ function Activity() {
                         Tipo de Atividade:
                       </Form.Label>
                       <Form.Select
-                        {...register("activityType")}
+                        {...register("type")}
                         className="py-3"
-                        isInvalid={!!errors.activityType}
+                        isInvalid={!!errors.type}
                         defaultValue=""
                       >
                         <option value="" disabled>
                           Selecione um tipo
                         </option>{" "}
-                        <option value="codigo">Código</option>
-                        <option value="discursiva">Discursiva</option>
-                        <option value="objetiva">Objetiva</option>
+                        {ACTIVITY_TYPES.map((tipo) => (
+                          <option key={tipo} value={tipo}>
+                            {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                          </option>
+                        ))}
                       </Form.Select>
                       <Form.Control.Feedback type="invalid">
-                        {errors.activityType?.message}
+                        {errors.type?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
 
@@ -307,11 +271,11 @@ function Activity() {
                         as="textarea"
                         rows={4}
                         placeholder="Exemplo de preenchido descritivo"
-                        {...register("activityDescription")}
-                        isInvalid={!!errors.activityDescription}
+                        {...register("description")}
+                        isInvalid={!!errors.description}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.activityDescription?.message}
+                        {errors.description?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
 

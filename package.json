@@ -1,0 +1,9 @@
+{
+  "name": "educatrix-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}
