@@ -1,0 +1,9 @@
+{
+  "name": "@educatrix/shared",
+  "version": "1.0.0",
+  "main": "schemas/activitySchema.js",
+  "type": "module",
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}

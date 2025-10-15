@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { Card, Form, Button, InputGroup, Spinner } from "react-bootstrap";
 import { useAuth } from "../hooks/useAuth";
-
-const loginSchema = z.object({
-  email: z.email("Email inválido"),
-  password: z
-    .string()
-    .min(1, "Senha é obrigatória")
-    .min(6, "Mínimo 6 caracteres"),
-});
+import { loginSchema } from "@educatrix/shared/schemas/loginSchema";
 
 function Login() {
   const {
@@ -153,7 +145,7 @@ function Login() {
             <br />
             Email: prof@educatrix.dev
             <br />
-            Senha: 123456
+            Senha: 123Abc!
           </small>
         </div>
       </Form>

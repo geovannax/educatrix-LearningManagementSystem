@@ -6,11 +6,8 @@ const authService = AuthService;
 class AuthController {
   static async authenticate(req, res) {
     try {
-      // Obter email e password do corpo da requisição
-      const { email, password } = req.body || {};
-
       // Service retorna o usuário ou erros
-      const user = await authService.authenticate(email, password);
+      const user = await authService.authenticate(req);
 
       if (user.status === 400) {
         return BaseController.send400(res, user.message);
@@ -28,7 +25,7 @@ class AuthController {
 
       return BaseController.send200(
         res,
-        { role: user.role, name: user.name, token: user.token },
+        { role: user.role, name: user.name },
         "Login bem-sucedido"
       );
     } catch (error) {

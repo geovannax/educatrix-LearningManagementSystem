@@ -1,99 +1,153 @@
-import Activity from "../models/Activity.js";
+import prisma from "../prisma.js";
+import { activitySchema } from "@educatrix/shared/schemas/activitySchema.js";
+
 /**
  * Serviço de Atividades
  * Contém a lógica de negócio relacionada às atividades
  */
 class ActivityService {
-  constructor() {
-    // Armazenamento em memória
-    this.activities = [];
-    this.nextId = 1;
-  }
-
   /**
    * Cria uma nova atividade
    * @param {Object} activityData - Dados da atividade a ser criada
-   * @returns {Promise<Activity>} Dados da atividade criada
+   * @return {Promise<Object>} Atividade criada
    * @throws {Error} Erro de validação ou criação
    */
   async createActivity(activityData) {
-    // Atribuir ID único
-    activityData.id = this.nextId++;
-
-    // Criar instância usando o modelo Activity
-    const newActivity = new Activity(activityData);
-
-    // Validações de entrada
-    const validationErrors = await newActivity.validateActivityInput();
-    if (validationErrors.length > 0) {
+    const result = activitySchema.safeParse(activityData);
+    if (!result.success) {
       const error = new Error("Dados de entrada inválidos");
       error.code = 400;
-      error.details = validationErrors;
+      error.details = result.error.issues.map((e) => e.message);
       throw error;
     }
 
-    this.activities.push(newActivity);
+    const newActivity = await prisma.activity
+      .create({
+        data: {
+          title: activityData.title,
+          description: activityData.description,
+          type: {
+            connect: { type: activityData.type },
+          },
+          professor: {
+            connect: { email: "prof@educatrix.dev" }, // Substitua pelo email real do professor
+          },
+        },
+      })
+      .catch((erro) => {
+        console.error("Erro ao criar atividade:", erro);
+        const error = new Error("Erro ao criar atividade");
+        error.code = 400;
+        error.details = "Erro ao criar atividade";
+        throw error;
+      });
 
-    // Validar se o tipo de atividade é codigo se sim
-    // enviar para API do servidor externo (simulada)
-
-    return newActivity;
+    return this.getActivityById(newActivity.id);
   }
 
   /**
    * Lista todas as atividades
    * @returns {Promise<Array>} Lista de atividades (sempre array, mesmo se vazio)
+   * @throws {Error} Erro ao buscar atividades
    */
   async getAllActivities() {
-    let result = [...this.activities];
-    return result;
+    const activities = await prisma.activity
+      .findMany({
+        include: {
+          type: { select: { type: true } },
+        },
+      })
+      .catch((erro) => {
+        const error = new Error("Erro ao buscar atividades");
+        error.code = 400;
+        error.details = "Erro ao buscar atividades";
+        throw error;
+      });
+
+    // Mapeia para retornar apenas os campos desejados
+    return activities.map((a) => ({
+      id: a.id,
+      title: a.title,
+      type: a.type?.type, // retorna só o nome do tipo
+      description: a.description,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+    }));
   }
 
   /**
    * Recupera uma atividade pelo ID
+   * @returns {Promise<Object|null>} Atividade ou null se não encontrada
    * @param {number} id - ID da atividade
-   * @returns {Promise<Activity|null>} Atividade encontrada ou null
+   * @throws {Error} Erro ao buscar atividade
    */
   async getActivityById(id) {
     const activityId = parseInt(id, 10);
-    const activity = this.activities.find((a) => a.id === activityId);
-    return activity || null;
+    const activity = await prisma.activity
+      .findUnique({
+        where: { id: activityId },
+        include: {
+          type: { select: { type: true } },
+        },
+      })
+      .catch((erro) => {
+        const error = new Error("Erro ao buscar atividade");
+        error.code = 400;
+        error.details = "Erro ao buscar atividade";
+        throw error;
+      });
+
+    if (!activity) {
+      return null;
+    }
+
+    return {
+      id: activity.id,
+      title: activity.title,
+      type: activity.type?.type, // retorna só o nome do tipo
+      description: activity.description,
+      createdAt: activity.createdAt,
+      updatedAt: activity.updatedAt,
+    };
   }
 
   /**
    * Atualiza uma atividade pelo ID
    * @param {number} id - ID da atividade a ser atualizada
    * @param {Object} updateData - Dados a serem atualizados
-   * @returns {Promise<Activity|null>} Atividade atualizada ou null se não encontrada
+   * @return {Promise<Object>} Atividade atualizada
    * @throws {Error} Erro de validação ou atualização
    */
   async updateActivityById(id, updateData) {
-    const activity = await this.getActivityById(id);
-    if (!activity) {
-      return null;
-    }
+    const activityId = parseInt(id, 10);
 
-    // Criar uma cópia e atualiza os campos para validação
-    const tempActivity = { ...activity, ...updateData };
-    // Atualizar a data de atualização
-    tempActivity.updatedAt = new Date().toISOString();
-
-    // Criar instância temporária do modelo para validação
-    const activityToValidate = new Activity(tempActivity);
-
-    // Validações de entrada
-    const validationErrors = await activityToValidate.validateActivityInput();
-    if (validationErrors.length > 0) {
+    const result = activitySchema.safeParse(updateData);
+    if (!result.success) {
       const error = new Error("Dados de entrada inválidos");
       error.code = 400;
-      error.details = validationErrors;
+      error.details = result.error.issues.map((e) => e.message);
       throw error;
     }
 
-    // Atualiza os dados da atividade
-    Object.assign(activity, tempActivity);
+    const updatedActivity = await prisma.activity
+      .update({
+        where: { id: activityId },
+        data: {
+          title: updateData.title,
+          description: updateData.description,
+          type: {
+            connect: { type: updateData.type },
+          },
+        },
+      })
+      .catch((erro) => {
+        const error = new Error("Erro ao atualizar atividade");
+        error.code = 400;
+        error.details = "Erro ao atualizar atividade";
+        throw error;
+      });
 
-    return activity;
+    return await this.getActivityById(updatedActivity.id);
   }
 
   /**
@@ -102,13 +156,20 @@ class ActivityService {
    * @returns {Promise<boolean>} true se deletada, false se não encontrada
    */
   async deleteActivityById(id) {
-    const activityId = parseInt(id, 10); // Converter para number
-    const activityIndex = this.activities.findIndex((a) => a.id === activityId);
-    if (activityIndex === -1) {
-      return false;
-    }
-    this.activities.splice(activityIndex, 1);
-    return true;
+    const activityId = parseInt(id, 10);
+
+    const activity = await prisma.activity
+      .delete({
+        where: { id: activityId },
+      })
+      .catch((erro) => {
+        const error = new Error("Erro ao deletar atividade");
+        error.code = 400;
+        error.details = "Erro ao deletar atividade";
+        throw error;
+      });
+
+    return !!activity;
   }
 }
 

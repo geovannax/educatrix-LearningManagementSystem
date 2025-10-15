@@ -31,6 +31,12 @@ class BaseController {
     });
   }
 
+  static send403(res, message = "Acesso negado") {
+    return res.status(403).json({
+      details: message,
+    });
+  }
+
   static send404(res, message = "Recurso não encontrado") {
     return res.status(404).json({
       details: message,

@@ -8,16 +8,8 @@ const api = axios.create({
     "Content-Type": "application/json",
     accept: "application/json",
   },
+  withCredentials: true, // Permite envio de cookies em requisições CORS
 });
-
-// // Interceptor para adicionar token automaticamente
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("authToken");
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
 
 // Interceptor para tratar erros globalmente
 api.interceptors.response.use(

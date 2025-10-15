@@ -1,7 +1,15 @@
 import { Router } from "express";
 import ActivityController from "../controllers/ActivityController.js";
+import { authenticateJWT } from "../middlewares/authMiddleware.js";
+import { authorizeRole } from "../middlewares/authorizeRole.js";
 
 const router = Router();
+
+// Aplica o middleware para todas as rotas deste router
+router.use(authenticateJWT);
+
+// Apenas admin e professor podem acessar estas rotas
+router.use(authorizeRole("admin", "professor"));
 
 /**
  * @openapi

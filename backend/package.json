@@ -5,18 +5,26 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed": "npx prisma migrate dev --name init && node prisma/seed.js"
   },
   "dependencies": {
+    "@educatrix/shared": "^1.0.0",
+    "@prisma/client": "^6.17.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.12"
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.17.0"
   }
 }

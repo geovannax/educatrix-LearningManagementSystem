@@ -1,37 +1,47 @@
-import User from "../models/User.js";
+import prisma from "../prisma.js";
+import { loginSchema } from "@educatrix/shared/schemas/loginSchema.js";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET =
+  process.env.JWT_SECRET || "EM PRODUCAO, USAR VARIAVEL DE AMBIENTE";
 
 class AuthService {
   /**
    * Autentica usuário com email e senha
-   * @param {string} email - Email do usuário
+   * @param {string} req - Request do Express
    * @param {string} password - Senha do usuário
    * @returns {Promise<Object>} Resultado da autenticação
    */
-  async authenticate(email, password) {
-    // Validar entrada básica email e password.
-    if (!email || !password) {
-      return { status: 400, message: "Email e password são obrigatórios" };
-    }
-
-    const user = User.findByEmail(email);
-    if (!user || user.password !== password) {
+  async authenticate(req) {
+    const result = loginSchema.safeParse(req.body);
+    if (!result.success) {
       return { status: 401, message: "Credenciais inválidas" };
     }
 
-    // Gerar token no  service
-    const token = this.generateMockToken(user);
+    const user = await prisma.user.findUnique({
+      where: { email: result.data.email },
+      include: { role: true },
+    });
+
+    if (!user || user.password !== result.data.password) {
+      return { status: 401, message: "Credenciais inválidas" };
+    }
+
+    // Gerar token no service
+    const token = this.generateJWTToken(user);
 
     return { ...user, token };
   }
 
   /**
-   * Gera token mock baseado no usuário (substituir por JWT futuramente)
+   * Gera token JWT baseado no usuário
    * @param {Object} user - Dados do usuário
-   * @returns {string} Token mock
+   * @returns {string} Token JWT
    */
-  generateMockToken(user) {
-    // Em produção: jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '24h' })
-    return `fake-token-${user.role}-${user.id}`;
+  generateJWTToken(user) {
+    return jwt.sign({ id: user.id, role: user.role.name }, JWT_SECRET, {
+      expiresIn: "24h",
+    });
   }
 }
 
