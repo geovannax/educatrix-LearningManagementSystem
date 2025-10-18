@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "EM PRODUCAO, USAR VARIAVEL DE AMBIENTE";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export function authenticateJWT(req, res, next) {
   // Tenta pegar o token do cookie

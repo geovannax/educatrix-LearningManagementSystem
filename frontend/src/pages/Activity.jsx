@@ -11,6 +11,7 @@ import {
   Table,
 } from "react-bootstrap";
 import AppNavbar from "../components/layout/AppNavbar";
+import CustomModal from "../components/layout/CustomModal";
 import { useActivities } from "../hooks/useActivities";
 import { useToast } from "../contexts/ToastContext";
 import {
@@ -23,6 +24,7 @@ function Activity() {
   const [activeTab, setActiveTab] = useState("lista");
   const [editingActivity, setEditingActivity] = useState(null);
   const { addToast } = useToast();
+  const [toDelete, setToDelete] = useState(null);
 
   // Usar o hook useActivities
   const {
@@ -88,12 +90,14 @@ function Activity() {
   };
 
   const onDelete = async (id) => {
+    if (!toDelete) return;
     const result = await deleteActivity(id);
 
     if (result.success) {
       reset();
       addToast("Sucesso", "Atividade deletada com sucesso!");
     }
+    setToDelete(null);
   };
 
   // Função para cancelar a edição
@@ -191,7 +195,7 @@ function Activity() {
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                onClick={() => onDelete(atividade.id)}
+                                onClick={() => setToDelete(atividade)}
                               >
                                 <i className="bi bi-trash"></i>
                               </Button>
@@ -202,6 +206,23 @@ function Activity() {
                     </Table>
                   )}
                 </Card.Body>
+                {/* Modal simples */}
+                {toDelete && (
+                  <CustomModal
+                    show={true}
+                    title="Confirmar Exclusão"
+                    body={
+                      <>
+                        Confirma a exclusão de "
+                        <strong>{toDelete.title}</strong>"?
+                      </>
+                    }
+                    onConfirm={() => onDelete(toDelete.id)}
+                    onCancel={() => setToDelete(null)}
+                    confirmLabel="Sim, deletar"
+                    loading={isLoadingActivity}
+                  />
+                )}
               </Card>
             ) : (
               <Card className="shadow-sm border-0">

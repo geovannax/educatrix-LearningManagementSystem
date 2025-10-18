@@ -1,9 +1,10 @@
-import prisma from "../prisma.js";
-import { loginSchema } from "@educatrix/shared/schemas/loginSchema.js";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { loginSchema } from "@educatrix/shared/schemas/loginSchema.js";
+import prisma from "../prisma.js";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "EM PRODUCAO, USAR VARIAVEL DE AMBIENTE";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 class AuthService {
   /**
@@ -18,12 +19,16 @@ class AuthService {
       return { status: 401, message: "Credenciais inválidas" };
     }
 
+    // Buscar usuário incluindo o role relacionado
     const user = await prisma.user.findUnique({
       where: { email: result.data.email },
       include: { role: true },
     });
 
-    if (!user || user.password !== result.data.password) {
+    // Comparar senha plain com hash armazenado
+    const match = await bcrypt.compare(result.data.password, user.password);
+
+    if (!user || !match) {
       return { status: 401, message: "Credenciais inválidas" };
     }
 
@@ -40,7 +45,7 @@ class AuthService {
    */
   generateJWTToken(user) {
     return jwt.sign({ id: user.id, role: user.role.name }, JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: `${JWT_EXPIRES_IN}h`,
     });
   }
 }

@@ -10,8 +10,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db" //  Em produção usar env("DATABASE_URL")
+  provider = "sqlite" // Oficialmente não é recomendado usar env() no provider
+  url      = env("DATABASE_URL")
 }
 
 model Role {

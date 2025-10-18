@@ -1,6 +1,8 @@
 import AuthService from "../services/AuthService.js";
 import BaseController from "./BaseController.js";
 
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+
 const authService = AuthService;
 
 class AuthController {
@@ -20,7 +22,7 @@ class AuthController {
         httpOnly: true,
         secure: true, // Apenas HTTPS
         sameSite: "strict", // Proteção CSRF
-        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        maxAge: JWT_EXPIRES_IN * 60 * 60 * 1000, // 24 horas
       });
 
       return BaseController.send200(

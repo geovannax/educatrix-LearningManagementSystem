@@ -1,7 +1,13 @@
+import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
+const JWT_SALT_ROUNDS = parseInt(process.env.JWT_SALT_ROUNDS);
+
 async function main() {
+  const defaultPassword = await bcrypt.hash("123Abc!", JWT_SALT_ROUNDS);
+
   // Cria roles
   const [aluno, professor, admin] = await Promise.all([
     prisma.role.create({ data: { name: "aluno" } }),
@@ -21,19 +27,19 @@ async function main() {
     data: [
       {
         email: "prof@educatrix.dev",
-        password: "123Abc!",
+        password: defaultPassword,
         name: "Professor do Educatrix",
         roleId: professor.id,
       },
       {
         email: "aluno@educatrix.dev",
-        password: "123Abc!",
+        password: defaultPassword,
         name: "Aluno Educatrix",
         roleId: aluno.id,
       },
       {
         email: "admin@educatrix.dev",
-        password: "123Abc!",
+        password: defaultPassword,
         name: "Admin Educatrix",
         roleId: admin.id,
       },

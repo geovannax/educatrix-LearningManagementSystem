@@ -3,7 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import "dotenv/config";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -19,14 +19,18 @@ import swaggerJsdoc from "swagger-jsdoc";
 // Prisma Client (ORM)
 import prisma from "./prisma.js";
 
+// Variáveis de ambiente
+const APP_CORS_ORIGIN = process.env.APP_CORS_ORIGIN;
+const APP_LISTEN_PORT = parseInt(process.env.APP_LISTEN_PORT);
+const APP_LISTEN_URL = process.env.APP_LISTEN_URL;
+const SWAGGER_SPEC_DEFINITION_INFO_TITLE =
+  process.env.SWAGGER_SPEC_DEFINITION_INFO_TITLE;
+const SWAGGER_SPEC_DEFINITION_INFO_VERSION =
+  process.env.SWAGGER_SPEC_DEFINITION_INFO_VERSION;
+
 // --- Inicialização básica
 const app = express();
-app.use(
-  cors({
-    origin: "http://localhost:3001",
-    credentials: true,
-  })
-);
+app.use(cors({ origin: APP_CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -39,8 +43,11 @@ const __dirname = path.dirname(__filename);
 const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.0",
-    info: { title: "Educatrix API", version: "0.1.0" },
-    servers: [{ url: "http://localhost:3000" }],
+    info: {
+      title: SWAGGER_SPEC_DEFINITION_INFO_TITLE,
+      version: SWAGGER_SPEC_DEFINITION_INFO_VERSION,
+    },
+    servers: [{ url: `${APP_LISTEN_URL}:${APP_LISTEN_PORT}` }],
   },
   // Arquivos onde estão os comentários @openapi
   apis: [
@@ -56,9 +63,8 @@ app.use("/api/v1/activities", activityRouter);
 app.use("/api/v1/auth", authRouter);
 
 // --- Subir servidor
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Educatrix API rodando em http://localhost:${PORT}`);
+const server = app.listen(APP_LISTEN_PORT, () => {
+  console.log(`Educatrix API rodando em ${APP_LISTEN_URL}:${APP_LISTEN_PORT}`);
 });
 
 // Fechar conexão Prisma ao encerrar o servidor
